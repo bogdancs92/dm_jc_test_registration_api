@@ -1,0 +1,39 @@
+version: '3.7'
+services: 
+
+    php:
+        build: 
+            context: .
+            dockerfile: docker/php/Dockerfile        
+        container_name: jc_php
+        image: jc_php
+        restart: "unless-stopped"
+        volumes: 
+            - '.:/usr/src/api'
+        environment:
+            HOME: /home/user
+
+    nginx:
+        build: 
+            context: .
+            dockerfile: docker/nginx/Dockerfile
+        container_name: jc_nginx
+        image: jc_nginx
+        restart: "unless-stopped"
+        depends_on: 
+            - php
+        ports: 
+            - '8080:80'
+        volumes: 
+            - './public/:/usr/src/api'
+
+    dbms:
+        container_name: jc_postgres
+        image: postgres:13
+        restart: "unless-stopped"
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: dailymotion
+        volumes:
+            - ./docker/pgsql/init.sql:/docker-entrypoint-initdb.d/init.sql
